@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>สนามคำศัพท์</title>
+<meta name="description" content="เกมฝึกคำศัพท์ภาษาอังกฤษ 4 ระดับ พร้อมกระดานคะแนนแข่งกับเพื่อน">
+<meta name="theme-color" content="#14110D">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<style>
+/* ═══ สนามคำศัพท์ — สไตล์ ═══════════════════════════════ */
+
+:root{
+  --ink:#FAF6EE; --surf:#FFFFFF; --surf2:#F2ECE0; --line:#E0D6C4;
+  --tx:#241E17; --tx2:#6E6153; --tx3:#9C8E7D;
+  --gold:#B8730A; --gold-soft:#F6E6C6; --on-gold:#FFFFFF;
+  --jade:#0E7A5C; --jade-soft:#D7EFE5;
+  --brick:#B33A25; --brick-soft:#F8DED7;
+  --shadow:0 1px 0 rgba(36,30,23,.05), 0 8px 24px -12px rgba(36,30,23,.35);
+  --ring:0 0 0 3px rgba(184,115,10,.32);
+  --scale:1;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ink:#14110D; --surf:#1E1913; --surf2:#2A231B; --line:#3A3126;
+    --tx:#F6EFE2; --tx2:#B0A18D; --tx3:#7E7264;
+    --gold:#F0A81E; --gold-soft:#3B2C0F; --on-gold:#1A1206;
+    --jade:#42C79A; --jade-soft:#12312A;
+    --brick:#F0765A; --brick-soft:#3A1C16;
+    --shadow:0 1px 0 rgba(255,255,255,.03), 0 14px 30px -16px rgba(0,0,0,.8);
+    --ring:0 0 0 3px rgba(240,168,30,.3);
+  }
+}
+:root[data-theme="dark"]{
+  --ink:#14110D; --surf:#1E1913; --surf2:#2A231B; --line:#3A3126;
+  --tx:#F6EFE2; --tx2:#B0A18D; --tx3:#7E7264;
+  --gold:#F0A81E; --gold-soft:#3B2C0F; --on-gold:#1A1206;
+  --jade:#42C79A; --jade-soft:#12312A;
+  --brick:#F0765A; --brick-soft:#3A1C16;
+  --shadow:0 1px 0 rgba(255,255,255,.03), 0 14px 30px -16px rgba(0,0,0,.8);
+  --ring:0 0 0 3px rgba(240,168,30,.3);
+}
+/* ขนาดตัวอักษร ผู้เล่นเลือกได้ในหน้าตั้งค่า */
+:root[data-size="s"]{--scale:.9}
+:root[data-size="l"]{--scale:1.14}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0; background:var(--ink); color:var(--tx);
+  font-family:"IBM Plex Sans Thai","Segoe UI",Tahoma,sans-serif;
+  font-size:calc(15px * var(--scale)); line-height:1.55;
+  padding:22px 16px calc(40px + env(safe-area-inset-bottom));
+  display:flex; justify-content:center;
+}
+.app{width:100%; max-width:460px; display:flex; flex-direction:column; gap:18px}
+h1,h2{font-family:"Bricolage Grotesque","IBM Plex Sans Thai",sans-serif; margin:0; text-wrap:balance; font-weight:700}
+.mono{font-family:"IBM Plex Mono",ui-monospace,monospace; font-variant-numeric:tabular-nums}
+button{font:inherit; color:inherit; cursor:pointer}
+:focus-visible{outline:none; box-shadow:var(--ring)}
+.hide{display:none!important}
+
+/* ── หัวเรื่อง ─────────────────────────────────────────── */
+.mast{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.mast h1{font-size:calc(26px * var(--scale)); letter-spacing:-.02em; line-height:1.1}
+.mast .right{display:flex; align-items:center; gap:10px}
+.net{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.1em;
+  padding:3px 8px; border-radius:999px; border:1px solid var(--line); color:var(--tx3); white-space:nowrap}
+.net.on{color:var(--jade); border-color:var(--jade)}
+.net.off{color:var(--tx3)}
+.icon{background:var(--surf2); border:1px solid var(--line); border-radius:9px;
+  width:34px; height:34px; display:grid; place-items:center; font-size:15px; flex:none; transition:.15s}
+.icon:hover{border-color:var(--tx3)}
+
+/* ── กล่อง ─────────────────────────────────────────────── */
+.panel{background:var(--surf); border:1px solid var(--line); border-radius:14px; padding:16px; box-shadow:var(--shadow)}
+.panel + .panel{margin-top:14px}
+.eyebrow{font-family:"IBM Plex Mono",monospace; font-size:10px; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--tx3); margin-bottom:10px;
+  display:flex; justify-content:space-between; align-items:center; gap:8px}
+.eyebrow em{font-style:normal; text-transform:none; letter-spacing:0; font-size:11px}
+
+/* ── ช่องกรอกชื่อ ──────────────────────────────────────── */
+.field{display:flex; gap:8px; align-items:center; background:var(--surf2);
+  border:1px solid var(--line); border-radius:10px; padding:0 12px}
+.field span{font-size:16px}
+.field input{flex:1; min-width:0; background:none; border:0; outline:none; color:var(--tx);
+  font:inherit; font-weight:600; padding:11px 0}
+.field input::placeholder{color:var(--tx3); font-weight:400}
+
+/* ── การ์ดระดับ ────────────────────────────────────────── */
+.levels{display:flex; flex-direction:column; gap:8px}
+.lv{display:grid; grid-template-columns:auto 1fr auto; gap:12px; align-items:center;
+  background:var(--surf2); border:1px solid var(--line); border-radius:12px; padding:12px 14px;
+  text-align:left; transition:border-color .15s, background .15s, transform .1s}
+.lv:hover:not([disabled]){transform:translateY(-1px)}
+.lv[aria-pressed="true"]{border-color:var(--gold); background:var(--gold-soft)}
+.lv[disabled]{opacity:.45; cursor:not-allowed}
+.lv .tier{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600; color:var(--tx3);
+  border:1px solid var(--line); border-radius:6px; padding:5px 7px; background:var(--surf)}
+.lv[aria-pressed="true"] .tier{color:var(--gold); border-color:var(--gold)}
+.lv>span:nth-child(2){min-width:0}
+.lv b{display:block; font-size:calc(15px * var(--scale)); font-weight:600}
+.lv small{display:block; color:var(--tx2); font-size:calc(12px * var(--scale)); line-height:1.35}
+.lv .count{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--tx3); white-space:nowrap}
+
+/* ── ชิปโหมด ───────────────────────────────────────────── */
+.chips{display:flex; gap:8px; flex-wrap:wrap}
+.chip{background:var(--surf2); border:1px solid var(--line); border-radius:999px;
+  padding:8px 14px; font-size:calc(13px * var(--scale)); font-weight:500; transition:.15s}
+.chip[aria-pressed="true"]{background:var(--tx); color:var(--surf); border-color:var(--tx)}
+.note{font-size:calc(12px * var(--scale)); color:var(--tx2); margin:10px 0 0; min-height:3.4em}
+
+/* ── แถวสวิตช์ / เลือก ─────────────────────────────────── */
+.row{display:flex; align-items:center; justify-content:space-between;
+  gap:10px; margin-top:12px; font-size:calc(13px * var(--scale)); color:var(--tx2)}
+.row:first-child{margin-top:0}
+.sw{width:42px; height:24px; border-radius:999px; background:var(--line);
+  border:0; position:relative; transition:.18s; flex:none}
+.sw::after{content:""; position:absolute; top:3px; left:3px; width:18px; height:18px;
+  border-radius:50%; background:var(--surf); transition:.18s}
+.sw[aria-pressed="true"]{background:var(--gold)}
+.sw[aria-pressed="true"]::after{left:21px; background:#fff}
+select{background:var(--surf2); color:var(--tx); border:1px solid var(--line);
+  border-radius:9px; padding:8px 10px; font:inherit; font-size:calc(13px * var(--scale)); max-width:58%}
+.seg{display:flex; border:1px solid var(--line); border-radius:9px; overflow:hidden; flex:none}
+.seg button{background:var(--surf2); border:0; padding:7px 13px; font-size:12px; font-weight:600; transition:.15s}
+.seg button + button{border-left:1px solid var(--line)}
+.seg button[aria-pressed="true"]{background:var(--tx); color:var(--surf)}
+
+/* ── ปุ่มหลัก ──────────────────────────────────────────── */
+.go{width:100%; border:0; border-radius:12px; padding:15px; background:var(--gold); color:var(--on-gold);
+  font-family:"Bricolage Grotesque","IBM Plex Sans Thai",sans-serif; font-weight:700;
+  font-size:calc(17px * var(--scale)); transition:.15s; margin-top:14px}
+.go:hover{filter:brightness(1.06)}
+.go[disabled]{opacity:.5; cursor:not-allowed; filter:none}
+.ghost{width:100%; background:var(--surf2); border:1px solid var(--line); border-radius:12px;
+  padding:13px; font-weight:600; font-size:calc(15px * var(--scale)); transition:.15s; margin-top:9px}
+.ghost:hover{border-color:var(--tx3)}
+
+/* ── แถบสถานะระหว่างเล่น ───────────────────────────────── */
+.hud{display:grid; grid-template-columns:52px 1fr auto; gap:14px; align-items:center}
+.dial{position:relative; width:52px; height:52px; flex:none}
+.dial svg{transform:rotate(-90deg)}
+.dial .val{position:absolute; inset:0; display:grid; place-items:center;
+  font-family:"IBM Plex Mono",monospace; font-size:15px; font-weight:600}
+.who{font-size:calc(12px * var(--scale)); color:var(--tx2); display:flex;
+  align-items:center; gap:6px; flex-wrap:wrap}
+.score{font-family:"IBM Plex Mono",monospace; font-size:calc(24px * var(--scale));
+  font-weight:600; letter-spacing:-.02em; line-height:1.15}
+.streak{font-family:"IBM Plex Mono",monospace; font-size:11px; font-weight:600;
+  color:var(--gold); background:var(--gold-soft); border-radius:999px; padding:3px 8px}
+.qcount{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--tx3); text-align:right}
+
+/* ── การ์ดคำถาม ────────────────────────────────────────── */
+.card{background:var(--surf); border:1px solid var(--line); border-radius:16px;
+  padding:22px 18px; text-align:center; box-shadow:var(--shadow)}
+.tag{display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:10px;
+  letter-spacing:.12em; color:var(--tx3); border:1px solid var(--line);
+  border-radius:999px; padding:3px 10px; margin-bottom:14px}
+.word{font-family:"Bricolage Grotesque","IBM Plex Sans Thai",sans-serif;
+  font-size:calc(38px * var(--scale)); font-weight:700; letter-spacing:-.03em;
+  line-height:1.12; word-break:break-word}
+.word.th{font-family:"IBM Plex Sans Thai",sans-serif; font-size:calc(31px * var(--scale)); font-weight:600}
+.phon{font-family:"IBM Plex Mono",monospace; font-size:calc(13px * var(--scale)); color:var(--gold); margin-top:8px}
+.say{background:none; border:1px solid var(--line); border-radius:999px;
+  width:34px; height:34px; margin-top:12px; font-size:14px; line-height:1; transition:.15s}
+.say:hover{border-color:var(--gold); color:var(--gold)}
+.dir{font-size:calc(11px * var(--scale)); color:var(--tx3); margin-top:10px}
+
+/* ── ตัวเลือกคำตอบ ─────────────────────────────────────── */
+.answers{display:flex; flex-direction:column; gap:9px; margin-top:12px}
+.ans{display:grid; grid-template-columns:auto 1fr; gap:11px; align-items:center; text-align:left;
+  background:var(--surf); border:1px solid var(--line); border-radius:12px; padding:14px;
+  font-size:calc(16px * var(--scale)); font-weight:500;
+  transition:border-color .12s, background .12s, transform .08s}
+.ans:hover:not(:disabled){border-color:var(--tx3)}
+.ans:active:not(:disabled){transform:scale(.99)}
+.ans .k{font-family:"IBM Plex Mono",monospace; font-size:11px; color:var(--tx3);
+  border:1px solid var(--line); border-radius:5px; width:22px; height:22px;
+  display:grid; place-items:center; flex:none}
+.ans.good{background:var(--jade-soft); border-color:var(--jade); color:var(--jade)}
+.ans.good .k{border-color:var(--jade); color:var(--jade)}
+.ans.bad{background:var(--brick-soft); border-color:var(--brick); color:var(--brick)}
+.ans.bad .k{border-color:var(--brick); color:var(--brick)}
+.ans:disabled{cursor:default}
+
+.pop{position:fixed; left:50%; top:26%; transform:translateX(-50%);
+  font-family:"IBM Plex Mono",monospace; font-weight:600; font-size:22px;
+  pointer-events:none; animation:rise .75s ease-out forwards; z-index:20}
+@keyframes rise{0%{opacity:0;transform:translate(-50%,8px) scale(.9)}
+  25%{opacity:1}100%{opacity:0;transform:translate(-50%,-34px)}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important; transition:none!important}}
+
+/* ── หน้าผลลัพธ์ ───────────────────────────────────────── */
+.big{font-family:"IBM Plex Mono",monospace; font-size:calc(56px * var(--scale));
+  font-weight:600; letter-spacing:-.04em; line-height:1}
+.stats{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line);
+  border:1px solid var(--line); border-radius:12px; overflow:hidden; margin-top:16px}
+.stats div{background:var(--surf); padding:11px 8px; text-align:center}
+.stats b{display:block; font-family:"IBM Plex Mono",monospace; font-size:calc(18px * var(--scale)); font-weight:600}
+.stats span{font-size:11px; color:var(--tx3)}
+
+/* ── กระดานคะแนน ───────────────────────────────────────── */
+.lbrow{display:grid; grid-template-columns:26px 1fr auto; gap:10px; align-items:center;
+  padding:9px 0; border-bottom:1px solid var(--line); font-size:calc(14px * var(--scale))}
+.lbrow:last-child{border-bottom:0}
+.lbrow .rk{font-family:"IBM Plex Mono",monospace; font-size:12px; color:var(--tx3); text-align:center}
+.lbrow.me{color:var(--gold); font-weight:600}
+.lbrow.me .rk{color:var(--gold)}
+.lbrow .pts{font-family:"IBM Plex Mono",monospace; font-weight:600}
+.lbrow .meta{font-size:11px; color:var(--tx3); font-weight:400}
+.empty{color:var(--tx3); font-size:calc(13px * var(--scale)); text-align:center; padding:16px 0; margin:0}
+.tabs{display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap}
+.tab{font-family:"IBM Plex Mono",monospace; font-size:11px; padding:5px 10px;
+  border-radius:7px; border:1px solid var(--line); background:none; color:var(--tx2)}
+.tab[aria-pressed="true"]{background:var(--tx); border-color:var(--tx); color:var(--surf)}
+
+/* ── รหัสท้าดวล ────────────────────────────────────────── */
+.duel{display:flex; gap:8px; align-items:center; margin-top:12px}
+.duel input{flex:1; min-width:0; background:var(--surf2); border:1px solid var(--line);
+  border-radius:10px; padding:10px 12px; font-family:"IBM Plex Mono",monospace;
+  font-size:calc(15px * var(--scale)); letter-spacing:.24em; text-transform:uppercase;
+  color:var(--tx); outline:none}
+.duel button{background:var(--surf2); border:1px solid var(--line); border-radius:10px;
+  padding:10px 14px; font-size:calc(13px * var(--scale)); font-weight:600; white-space:nowrap}
+.code{font-family:"IBM Plex Mono",monospace; font-size:calc(28px * var(--scale));
+  font-weight:600; letter-spacing:.28em; color:var(--gold)}
+
+.foot{font-size:11px; color:var(--tx3); text-align:center; line-height:1.7; margin:16px 0 0}
+.toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%);
+  background:var(--tx); color:var(--surf); padding:10px 16px; border-radius:10px;
+  font-size:13px; z-index:30; animation:fade 2.4s ease forwards; max-width:90vw}
+@keyframes fade{0%{opacity:0;transform:translate(-50%,8px)}12%,80%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
+
+</style>
+</head>
+<body>
+<div class="app">
+
+<header class="mast">
+  <h1>สนามคำศัพท์</h1>
+  <div class="right">
+    <span class="net" id="net">กำลังเชื่อมต่อ</span>
+    <button class="icon" id="gear" title="ตั้งค่า" aria-label="ตั้งค่า">⚙</button>
+  </div>
+</header>
+
+<!-- ══ ตั้งค่า ══════════════════════════════════════════ -->
+<section id="s-set" class="hide">
+  <div class="panel">
+    <div class="eyebrow">ตั้งค่า</div>
+    <div class="row">
+      <span>ขนาดตัวอักษร</span>
+      <div class="seg" id="seg-size">
+        <button data-v="s" aria-pressed="false">เล็ก</button>
+        <button data-v="m" aria-pressed="true">กลาง</button>
+        <button data-v="l" aria-pressed="false">ใหญ่</button>
+      </div>
+    </div>
+    <div class="row">
+      <span>ธีมสี</span>
+      <div class="seg" id="seg-theme">
+        <button data-v="auto" aria-pressed="true">อัตโนมัติ</button>
+        <button data-v="light" aria-pressed="false">สว่าง</button>
+        <button data-v="dark" aria-pressed="false">มืด</button>
+      </div>
+    </div>
+    <div class="row">
+      <span>เสียงประกอบ</span>
+      <button class="sw" id="sw-sound" aria-pressed="true" aria-label="เปิดปิดเสียง"></button>
+    </div>
+    <div class="row">
+      <span>สลับถาม อังกฤษ ↔ ไทย<br><small style="color:var(--tx3)">ยากขึ้น ฝึกนึกคำเอง</small></span>
+      <button class="sw" id="sw-rev" aria-pressed="false" aria-label="สลับทิศทางคำถาม"></button>
+    </div>
+    <div class="row">
+      <span>อ่านออกเสียงอัตโนมัติ</span>
+      <button class="sw" id="sw-speak" aria-pressed="false" aria-label="อ่านออกเสียงอัตโนมัติ"></button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow">เวลาและคะแนน</div>
+    <div class="row">
+      <span>ตะลุยเวลา — เวลาทั้งเกม</span>
+      <div class="seg" id="seg-rush">
+        <button data-v="30" aria-pressed="false">30 วิ</button>
+        <button data-v="60" aria-pressed="true">60 วิ</button>
+        <button data-v="120" aria-pressed="false">2 นาที</button>
+      </div>
+    </div>
+    <div class="row">
+      <span>เวลาต่อข้อ (อึดไม่ตาย / ท้าดวล)</span>
+      <div class="seg" id="seg-per">
+        <button data-v="6" aria-pressed="false">6 วิ</button>
+        <button data-v="8" aria-pressed="true">8 วิ</button>
+        <button data-v="12" aria-pressed="false">12 วิ</button>
+      </div>
+    </div>
+    <p class="note" style="min-height:0">คะแนนต่อข้อ = (100 + โบนัสความเร็ว) × ตัวคูณคอมโบ<br>
+      ตอบภายใน 5 วินาทีได้โบนัสความเร็วสูงสุด 100 · ตอบถูกติดกัน 10 ข้อได้ตัวคูณสูงสุด ×2.0</p>
+  </div>
+
+  <button class="ghost" id="set-back">เสร็จแล้ว</button>
+</section>
+
+<!-- ══ หน้าแรก ═════════════════════════════════════════ -->
+<section id="s-home">
+  <div class="panel">
+    <div class="eyebrow">ผู้เล่น</div>
+    <div class="field"><span>👤</span><input id="name" maxlength="14" placeholder="ใส่ชื่อของคุณ" autocomplete="off"></div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow">เลือกระดับ</div>
+    <div class="levels" id="levels"></div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow">โหมดการเล่น</div>
+    <div class="chips" id="modes"></div>
+    <p class="note" id="modenote"></p>
+    <div class="duel hide" id="duelbox">
+      <input id="duelcode" maxlength="5" placeholder="รหัสดวล" autocomplete="off">
+      <button id="newcode">สุ่มใหม่</button>
+    </div>
+    <div class="row">
+      <span>เจาะเฉพาะหมวด</span>
+      <select id="cat"><option value="">ทุกหมวด</option></select>
+    </div>
+  </div>
+
+  <button class="go" id="start">เริ่มเล่น</button>
+
+  <div class="panel">
+    <div class="eyebrow"><span>กระดานคะแนน</span><em id="lbwho"></em></div>
+    <div class="tabs" id="lbtabs"></div>
+    <div id="lblist"></div>
+  </div>
+
+  <p class="foot" id="foot"></p>
+</section>
+
+<!-- ══ เล่นเกม ═════════════════════════════════════════ -->
+<section id="s-play" class="hide">
+  <div class="panel">
+    <div class="hud">
+      <div class="dial">
+        <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true">
+          <circle cx="26" cy="26" r="22" fill="none" stroke="var(--line)" stroke-width="4"></circle>
+          <circle id="arc" cx="26" cy="26" r="22" fill="none" stroke="var(--gold)" stroke-width="4"
+                  stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="0"></circle>
+        </svg>
+        <div class="val mono" id="clock">60</div>
+      </div>
+      <div>
+        <div class="who"><span id="whoname">—</span><span class="streak hide" id="streak"></span></div>
+        <div class="score mono" id="score">0</div>
+      </div>
+      <div class="qcount" id="qcount"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <span class="tag" id="tag">—</span>
+    <div class="word" id="word">—</div>
+    <div class="phon mono" id="phon"></div>
+    <button class="say" id="say" title="ฟังเสียงอ่าน" aria-label="ฟังเสียงอ่าน">🔊</button>
+    <div class="dir" id="dir"></div>
+  </div>
+
+  <div class="answers" id="answers"></div>
+  <button class="ghost" id="quit">จบเกม &amp; บันทึกคะแนน</button>
+</section>
+
+<!-- ══ ผลลัพธ์ ═════════════════════════════════════════ -->
+<section id="s-done" class="hide">
+  <div class="card">
+    <div class="eyebrow" style="justify-content:center" id="r-reason">จบเกม</div>
+    <div class="big mono" id="r-score">0</div>
+    <div style="font-size:13px; color:var(--tx2); margin-top:6px" id="r-line">—</div>
+    <div class="stats">
+      <div><b class="mono" id="r-correct">0</b><span>ตอบถูก</span></div>
+      <div><b class="mono" id="r-acc">0%</b><span>ความแม่นยำ</span></div>
+      <div><b class="mono" id="r-streak">0</b><span>คอมโบสูงสุด</span></div>
+    </div>
+  </div>
+
+  <div class="panel hide" id="r-duel" style="text-align:center">
+    <div class="eyebrow" style="justify-content:center">ส่งรหัสนี้ให้เพื่อนเล่นชุดคำเดียวกัน</div>
+    <div class="code" id="r-code">—</div>
+    <button class="ghost" id="share">คัดลอกคำท้าดวล</button>
+  </div>
+
+  <div class="panel hide" id="r-miss">
+    <div class="eyebrow">คำที่ตอบผิด</div>
+    <div id="r-misslist"></div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow" id="r-lbhead">กระดานคะแนน</div>
+    <div id="r-lblist"></div>
+  </div>
+
+  <button class="go" id="again">เล่นอีกครั้ง</button>
+  <button class="ghost" id="home">กลับหน้าแรก</button>
+</section>
+
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   ไฟล์ตั้งค่า — นี่คือไฟล์เดียวที่คุณต้องแก้
+   ═══════════════════════════════════════════════════════════
+
+   ขั้นตอน (ดูละเอียดใน SETUP.md):
+   1. สมัคร supabase.com (ฟรี) แล้วสร้างโปรเจกต์
+   2. เข้าเมนู Project Settings → Data API
+   3. ก๊อบ "Project URL" มาวางที่ URL ข้างล่าง
+   4. ก๊อบ "anon public" key มาวางที่ KEY ข้างล่าง
+   5. เซฟไฟล์นี้
+
+   ตราบใดที่ยังไม่ใส่ เกมยังเล่นได้ปกติ
+   แค่คะแนนจะเก็บในเครื่องตัวเองไม่ใช่กระดานกลาง
+   ─────────────────────────────────────────────────────────── */
+
+window.VA_CONFIG = {
+
+  SUPABASE_URL: "",
+  SUPABASE_KEY: "",
+
+  /* ── กติกาเกม ปรับได้ตามใจ ───────────────────────────── */
+  RULES: {
+    rushSeconds:      60,   // โหมดตะลุยเวลา: เวลาทั้งเกม (วินาที)
+    rushPenalty:      3,    // โหมดตะลุยเวลา: ตอบผิดหักกี่วินาที
+    surviveSeconds:   8,    // โหมดอึดไม่ตาย: เวลาต่อข้อ
+    duelSeconds:      10,   // โหมดท้าดวล: เวลาต่อข้อ
+    duelQuestions:    20,   // โหมดท้าดวล: จำนวนข้อ
+
+    basePoints:       100,  // คะแนนพื้นฐานต่อข้อที่ตอบถูก
+    speedWindow:      5,    // ตอบภายในกี่วินาทีถึงได้โบนัสความเร็ว
+    speedBonus:       20,   // โบนัสความเร็วต่อวินาทีที่เหลือ
+    comboStep:        0.1,  // ตัวคูณเพิ่มขึ้นเท่าไรต่อ 1 คอมโบ
+    comboMax:         2.0,  // ตัวคูณสูงสุด
+    reverseChance:    0.4   // ถ้าเปิดโหมดสลับ จะถามเป็นไทย→อังกฤษ กี่ %
+  },
+
+  /* ── ระดับที่จะแสดง เรียงตามนี้ ──────────────────────── */
+  LEVELS: ["starter", "middle", "toeic", "advanced"]
+};
+
+</script>
+<script>window.VA_DATA = {"starter":{"id":"starter","label":"เริ่มต้น","tier":"A1","blurb":"คำที่เจอทุกวัน ร่างกาย ครอบครัว อาหาร สัตว์ บ้าน","target":1000,"source":"seed-demo","words":[{"en":"Head","pos":"","th":"ศีรษะ","read":"เฮด","cat":"ร่างกาย"},{"en":"Hand","pos":"","th":"มือ","read":"แฮนด์","cat":"ร่างกาย"},{"en":"Eye","pos":"","th":"ตา","read":"อาย","cat":"ร่างกาย"},{"en":"Nose","pos":"","th":"จมูก","read":"โนซ","cat":"ร่างกาย"},{"en":"Mouth","pos":"","th":"ปาก","read":"เมาธ์","cat":"ร่างกาย"},{"en":"Ear","pos":"","th":"หู","read":"เอียร์","cat":"ร่างกาย"},{"en":"Foot","pos":"","th":"เท้า","read":"ฟุต","cat":"ร่างกาย"},{"en":"Hair","pos":"","th":"ผม","read":"แฮร์","cat":"ร่างกาย"},{"en":"Mother","pos":"","th":"แม่","read":"มา-เธอร์","cat":"ครอบครัว"},{"en":"Father","pos":"","th":"พ่อ","read":"ฟา-เธอร์","cat":"ครอบครัว"},{"en":"Sister","pos":"","th":"พี่สาว/น้องสาว","read":"ซิส-เตอร์","cat":"ครอบครัว"},{"en":"Brother","pos":"","th":"พี่ชาย/น้องชาย","read":"บรา-เธอร์","cat":"ครอบครัว"},{"en":"Baby","pos":"","th":"ทารก","read":"เบ-บี้","cat":"ครอบครัว"},{"en":"Friend","pos":"","th":"เพื่อน","read":"เฟรนด์","cat":"ครอบครัว"},{"en":"Family","pos":"","th":"ครอบครัว","read":"แฟม-มิ-ลี่","cat":"ครอบครัว"},{"en":"Child","pos":"","th":"เด็ก","read":"ไชลด์","cat":"ครอบครัว"},{"en":"Rice","pos":"","th":"ข้าว","read":"ไรซ์","cat":"อาหาร"},{"en":"Egg","pos":"","th":"ไข่","read":"เอก","cat":"อาหาร"},{"en":"Milk","pos":"","th":"นม","read":"มิลก์","cat":"อาหาร"},{"en":"Water","pos":"","th":"น้ำ","read":"วอ-เทอร์","cat":"อาหาร"},{"en":"Fish","pos":"","th":"ปลา","read":"ฟิช","cat":"อาหาร"},{"en":"Bread","pos":"","th":"ขนมปัง","read":"เบรด","cat":"อาหาร"},{"en":"Apple","pos":"","th":"แอปเปิล","read":"แอป-เปิ้ล","cat":"อาหาร"},{"en":"Sugar","pos":"","th":"น้ำตาล","read":"ชู-การ์","cat":"อาหาร"},{"en":"Dog","pos":"","th":"สุนัข","read":"ด็อก","cat":"สัตว์"},{"en":"Cat","pos":"","th":"แมว","read":"แคท","cat":"สัตว์"},{"en":"Bird","pos":"","th":"นก","read":"เบิร์ด","cat":"สัตว์"},{"en":"Cow","pos":"","th":"วัว","read":"คาว","cat":"สัตว์"},{"en":"Pig","pos":"","th":"หมู","read":"พิก","cat":"สัตว์"},{"en":"Horse","pos":"","th":"ม้า","read":"ฮอร์ส","cat":"สัตว์"},{"en":"Duck","pos":"","th":"เป็ด","read":"ดัก","cat":"สัตว์"},{"en":"Mouse","pos":"","th":"หนู","read":"เมาส์","cat":"สัตว์"},{"en":"Door","pos":"","th":"ประตู","read":"ดอร์","cat":"ในบ้าน"},{"en":"Window","pos":"","th":"หน้าต่าง","read":"วิน-โด","cat":"ในบ้าน"},{"en":"Table","pos":"","th":"โต๊ะ","read":"เท-เบิล","cat":"ในบ้าน"},{"en":"Chair","pos":"","th":"เก้าอี้","read":"แชร์","cat":"ในบ้าน"},{"en":"Bed","pos":"","th":"เตียง","read":"เบด","cat":"ในบ้าน"},{"en":"Kitchen","pos":"","th":"ห้องครัว","read":"คิท-เชน","cat":"ในบ้าน"},{"en":"Room","pos":"","th":"ห้อง","read":"รูม","cat":"ในบ้าน"},{"en":"Floor","pos":"","th":"พื้น","read":"ฟลอร์","cat":"ในบ้าน"},{"en":"Eat","pos":"","th":"กิน","read":"อีท","cat":"คำกริยา"},{"en":"Sleep","pos":"","th":"นอนหลับ","read":"สลีป","cat":"คำกริยา"},{"en":"Run","pos":"","th":"วิ่ง","read":"รัน","cat":"คำกริยา"},{"en":"Walk","pos":"","th":"เดิน","read":"วอล์ก","cat":"คำกริยา"},{"en":"Read","pos":"","th":"อ่าน","read":"รีด","cat":"คำกริยา"},{"en":"Write","pos":"","th":"เขียน","read":"ไรท์","cat":"คำกริยา"},{"en":"Buy","pos":"","th":"ซื้อ","read":"บาย","cat":"คำกริยา"},{"en":"Open","pos":"","th":"เปิด","read":"โอ-เพ่น","cat":"คำกริยา"},{"en":"Big","pos":"","th":"ใหญ่","read":"บิก","cat":"คำคุณศัพท์"},{"en":"Small","pos":"","th":"เล็ก","read":"สมอล","cat":"คำคุณศัพท์"},{"en":"Hot","pos":"","th":"ร้อน","read":"ฮอท","cat":"คำคุณศัพท์"},{"en":"Cold","pos":"","th":"หนาว","read":"โคลด์","cat":"คำคุณศัพท์"},{"en":"Fast","pos":"","th":"เร็ว","read":"ฟาสต์","cat":"คำคุณศัพท์"},{"en":"Slow","pos":"","th":"ช้า","read":"สโลว์","cat":"คำคุณศัพท์"},{"en":"New","pos":"","th":"ใหม่","read":"นิว","cat":"คำคุณศัพท์"},{"en":"Old","pos":"","th":"เก่า","read":"โอลด์","cat":"คำคุณศัพท์"},{"en":"Monday","pos":"","th":"วันจันทร์","read":"มัน-เดย์","cat":"เวลา"},{"en":"Year","pos":"","th":"ปี","read":"เยียร์","cat":"เวลา"},{"en":"Month","pos":"","th":"เดือน","read":"มันธ์","cat":"เวลา"},{"en":"Today","pos":"","th":"วันนี้","read":"ทู-เดย์","cat":"เวลา"},{"en":"Morning","pos":"","th":"ตอนเช้า","read":"มอร์-นิ่ง","cat":"เวลา"},{"en":"Night","pos":"","th":"กลางคืน","read":"ไนท์","cat":"เวลา"},{"en":"Hour","pos":"","th":"ชั่วโมง","read":"อาว-เออร์","cat":"เวลา"},{"en":"Week","pos":"","th":"สัปดาห์","read":"วีค","cat":"เวลา"}]},"middle":{"id":"middle","label":"ระดับกลาง","tier":"B1","blurb":"คำนามธรรม อารมณ์ กริยาวลี ใช้เล่าเรื่องและแสดงความเห็น","target":1000,"source":"seed-demo","words":[{"en":"Anxious","pos":"","th":"วิตกกังวล","read":"แอง-เชิส","cat":"อารมณ์"},{"en":"Confident","pos":"","th":"มั่นใจ","read":"คอน-ฟิ-เดนท์","cat":"อารมณ์"},{"en":"Grateful","pos":"","th":"รู้สึกขอบคุณ","read":"เกรท-ฟุล","cat":"อารมณ์"},{"en":"Jealous","pos":"","th":"อิจฉา","read":"เจล-ลัส","cat":"อารมณ์"},{"en":"Lonely","pos":"","th":"เหงา","read":"โลน-ลี่","cat":"อารมณ์"},{"en":"Proud","pos":"","th":"ภูมิใจ","read":"พราวด์","cat":"อารมณ์"},{"en":"Curious","pos":"","th":"อยากรู้อยากเห็น","read":"คิว-เรียส","cat":"อารมณ์"},{"en":"Frustrated","pos":"","th":"หงุดหงิดคับข้องใจ","read":"ฟรัส-เทรท-เท็ด","cat":"อารมณ์"},{"en":"Reliable","pos":"","th":"น่าเชื่อถือ","read":"รี-ไล-อะ-เบิล","cat":"นิสัยคน"},{"en":"Generous","pos":"","th":"ใจกว้าง","read":"เจน-เนอ-รัส","cat":"นิสัยคน"},{"en":"Stubborn","pos":"","th":"ดื้อรั้น","read":"สตับ-เบิร์น","cat":"นิสัยคน"},{"en":"Honest","pos":"","th":"ซื่อสัตย์","read":"ออน-เนสท์","cat":"นิสัยคน"},{"en":"Polite","pos":"","th":"สุภาพ","read":"โพ-ไลท์","cat":"นิสัยคน"},{"en":"Ambitious","pos":"","th":"ทะเยอทะยาน","read":"แอม-บิ-เชิส","cat":"นิสัยคน"},{"en":"Cautious","pos":"","th":"ระมัดระวัง","read":"คอ-เชิส","cat":"นิสัยคน"},{"en":"Talented","pos":"","th":"มีพรสวรรค์","read":"แท-เลน-เท็ด","cat":"นิสัยคน"},{"en":"Improve","pos":"","th":"ทำให้ดีขึ้น","read":"อิม-พรูฟ","cat":"คำกริยา"},{"en":"Achieve","pos":"","th":"บรรลุผลสำเร็จ","read":"อะ-ชีฟ","cat":"คำกริยา"},{"en":"Avoid","pos":"","th":"หลีกเลี่ยง","read":"อะ-วอยด์","cat":"คำกริยา"},{"en":"Encourage","pos":"","th":"ให้กำลังใจ","read":"เอน-เค-อะ-เรจ","cat":"คำกริยา"},{"en":"Complain","pos":"","th":"บ่น/ร้องเรียน","read":"คอม-เพลน","cat":"คำกริยา"},{"en":"Suggest","pos":"","th":"เสนอแนะ","read":"ซัก-เจสท์","cat":"คำกริยา"},{"en":"Realize","pos":"","th":"ตระหนักได้","read":"รี-เรอ-ไลซ์","cat":"คำกริยา"},{"en":"Prevent","pos":"","th":"ป้องกันไม่ให้เกิด","read":"พรี-เวนท์","cat":"คำกริยา"},{"en":"Neighbor","pos":"","th":"เพื่อนบ้าน","read":"เน-เบอร์","cat":"สังคม"},{"en":"Relationship","pos":"","th":"ความสัมพันธ์","read":"รี-เล-ชัน-ชิพ","cat":"สังคม"},{"en":"Community","pos":"","th":"ชุมชน","read":"คอม-มิว-นิ-ตี้","cat":"สังคม"},{"en":"Culture","pos":"","th":"วัฒนธรรม","read":"คัล-เชอร์","cat":"สังคม"},{"en":"Tradition","pos":"","th":"ประเพณี","read":"ทรา-ดิ-ชัน","cat":"สังคม"},{"en":"Opportunity","pos":"","th":"โอกาส","read":"ออพ-เพอร์-ทู-นิ-ตี้","cat":"สังคม"},{"en":"Responsibility","pos":"","th":"ความรับผิดชอบ","read":"รี-สปอน-ซิ-บิ-ลิ-ตี้","cat":"สังคม"},{"en":"Experience","pos":"","th":"ประสบการณ์","read":"เอ็กซ์-เพีย-เรียนซ์","cat":"สังคม"},{"en":"Knowledge","pos":"","th":"ความรู้","read":"นอล-เลจ","cat":"การศึกษา"},{"en":"Research","pos":"","th":"งานวิจัย","read":"รี-เสิร์ช","cat":"การศึกษา"},{"en":"Subject","pos":"","th":"วิชา","read":"ซับ-เจกต์","cat":"การศึกษา"},{"en":"Degree","pos":"","th":"ปริญญา","read":"ดี-กรี","cat":"การศึกษา"},{"en":"Homework","pos":"","th":"การบ้าน","read":"โฮม-เวิร์ก","cat":"การศึกษา"},{"en":"Deadline","pos":"","th":"กำหนดส่ง","read":"เดด-ไลน์","cat":"การศึกษา"},{"en":"Result","pos":"","th":"ผลลัพธ์","read":"รี-ซัลท์","cat":"การศึกษา"},{"en":"Progress","pos":"","th":"ความคืบหน้า","read":"โพร-เกรส","cat":"การศึกษา"},{"en":"Weather","pos":"","th":"สภาพอากาศ","read":"เว-เธอร์","cat":"ธรรมชาติ"},{"en":"Climate","pos":"","th":"ภูมิอากาศ","read":"ไคล-เมท","cat":"ธรรมชาติ"},{"en":"Pollution","pos":"","th":"มลพิษ","read":"พอล-ลู-ชัน","cat":"ธรรมชาติ"},{"en":"Forest","pos":"","th":"ป่าไม้","read":"ฟอ-เรสท์","cat":"ธรรมชาติ"},{"en":"Earthquake","pos":"","th":"แผ่นดินไหว","read":"เอิร์ธ-เควก","cat":"ธรรมชาติ"},{"en":"Flood","pos":"","th":"น้ำท่วม","read":"ฟลัด","cat":"ธรรมชาติ"},{"en":"Drought","pos":"","th":"ภัยแล้ง","read":"เดราท์","cat":"ธรรมชาติ"},{"en":"Wildlife","pos":"","th":"สัตว์ป่า","read":"ไวลด์-ไลฟ์","cat":"ธรรมชาติ"},{"en":"Give up","pos":"","th":"ยอมแพ้","read":"กิฟ-อัพ","cat":"กริยาวลี"},{"en":"Look after","pos":"","th":"ดูแล","read":"ลุค-อาฟ-เตอร์","cat":"กริยาวลี"},{"en":"Put off","pos":"","th":"เลื่อนออกไป","read":"พุท-ออฟ","cat":"กริยาวลี"},{"en":"Find out","pos":"","th":"สืบจนรู้","read":"ไฟนด์-เอาท์","cat":"กริยาวลี"},{"en":"Get along","pos":"","th":"เข้ากันได้ดี","read":"เก็ท-อะ-ลอง","cat":"กริยาวลี"},{"en":"Run out","pos":"","th":"ใช้จนหมด","read":"รัน-เอาท์","cat":"กริยาวลี"},{"en":"Turn down","pos":"","th":"ปฏิเสธข้อเสนอ","read":"เทิร์น-ดาวน์","cat":"กริยาวลี"},{"en":"Bring up","pos":"","th":"เลี้ยงดู/หยิบยกขึ้นมา","read":"บริง-อัพ","cat":"กริยาวลี"},{"en":"Solution","pos":"","th":"ทางแก้ปัญหา","read":"โซ-ลู-ชัน","cat":"นามธรรม"},{"en":"Purpose","pos":"","th":"จุดมุ่งหมาย","read":"เพอร์-เพิส","cat":"นามธรรม"},{"en":"Advantage","pos":"","th":"ข้อได้เปรียบ","read":"แอด-แวน-เทจ","cat":"นามธรรม"},{"en":"Impact","pos":"","th":"ผลกระทบ","read":"อิม-แพกต์","cat":"นามธรรม"},{"en":"Effort","pos":"","th":"ความพยายาม","read":"เอฟ-เฟิร์ท","cat":"นามธรรม"},{"en":"Confidence","pos":"","th":"ความมั่นใจ","read":"คอน-ฟิ-เดนซ์","cat":"นามธรรม"},{"en":"Failure","pos":"","th":"ความล้มเหลว","read":"เฟล-เยอร์","cat":"นามธรรม"},{"en":"Decision","pos":"","th":"การตัดสินใจ","read":"ดี-ซิ-ชัน","cat":"นามธรรม"}]},"toeic":{"id":"toeic","label":"TOEIC","tier":"800","blurb":"ศัพท์ที่ออกสอบจริง สัญญา บัญชี HR โลจิสติกส์ ประชุม","target":1000,"source":"seed-demo","words":[{"en":"Agreement","pos":"","th":"ข้อตกลง","read":"อะ-กรี-เมนท์","cat":"สัญญา"},{"en":"Contract","pos":"","th":"สัญญา","read":"คอน-แทรกต์","cat":"สัญญา"},{"en":"Clause","pos":"","th":"ข้อความในสัญญา","read":"คลอส","cat":"สัญญา"},{"en":"Liability","pos":"","th":"ความรับผิดตามกฎหมาย","read":"ไล-อะ-บิ-ลิ-ตี้","cat":"สัญญา"},{"en":"Comply","pos":"","th":"ปฏิบัติตามข้อกำหนด","read":"คอม-พลาย","cat":"สัญญา"},{"en":"Terminate","pos":"","th":"บอกเลิก/ยุติ","read":"เทอร์-มิ-เนท","cat":"สัญญา"},{"en":"Negotiate","pos":"","th":"เจรจาต่อรอง","read":"นี-โก-ชิ-เอท","cat":"สัญญา"},{"en":"Amendment","pos":"","th":"การแก้ไขเพิ่มเติม","read":"อะ-เมนด์-เมนท์","cat":"สัญญา"},{"en":"Recruit","pos":"","th":"สรรหาพนักงาน","read":"รี-ครูท","cat":"บุคลากร"},{"en":"Applicant","pos":"","th":"ผู้สมัครงาน","read":"แอพ-พลิ-เคินท์","cat":"บุคลากร"},{"en":"Resume","pos":"","th":"ประวัติย่อสมัครงาน","read":"เร-ซู-เม่","cat":"บุคลากร"},{"en":"Promotion","pos":"","th":"การเลื่อนตำแหน่ง","read":"โพร-โม-ชัน","cat":"บุคลากร"},{"en":"Benefits","pos":"","th":"สวัสดิการ","read":"เบ-เน-ฟิทส์","cat":"บุคลากร"},{"en":"Retirement","pos":"","th":"การเกษียณอายุ","read":"รี-ไท-เออร์-เมนท์","cat":"บุคลากร"},{"en":"Supervisor","pos":"","th":"หัวหน้างาน","read":"ซู-เปอร์-ไว-เซอร์","cat":"บุคลากร"},{"en":"Personnel","pos":"","th":"บุคลากรทั้งหมด","read":"เพอร์-เซอ-เนล","cat":"บุคลากร"},{"en":"Invoice","pos":"","th":"ใบแจ้งหนี้","read":"อิน-วอยซ์","cat":"การเงิน"},{"en":"Budget","pos":"","th":"งบประมาณ","read":"บัด-เจ็ท","cat":"การเงิน"},{"en":"Expense","pos":"","th":"ค่าใช้จ่าย","read":"เอ็กซ์-เพนซ์","cat":"การเงิน"},{"en":"Revenue","pos":"","th":"รายได้","read":"เรฟ-เว-นิว","cat":"การเงิน"},{"en":"Deposit","pos":"","th":"เงินมัดจำ","read":"ดี-พอ-สิท","cat":"การเงิน"},{"en":"Refund","pos":"","th":"การคืนเงิน","read":"รี-ฟันด์","cat":"การเงิน"},{"en":"Audit","pos":"","th":"การตรวจสอบบัญชี","read":"ออ-ดิท","cat":"การเงิน"},{"en":"Fiscal","pos":"","th":"เกี่ยวกับการคลัง","read":"ฟิส-เคิล","cat":"การเงิน"},{"en":"Advertisement","pos":"","th":"โฆษณา","read":"แอด-เวอร์-ไทซ์-เมนท์","cat":"การตลาด"},{"en":"Campaign","pos":"","th":"แคมเปญรณรงค์","read":"แคม-เพน","cat":"การตลาด"},{"en":"Brand","pos":"","th":"ตราสินค้า","read":"แบรนด์","cat":"การตลาด"},{"en":"Survey","pos":"","th":"การสำรวจความเห็น","read":"เซอร์-เวย์","cat":"การตลาด"},{"en":"Competitor","pos":"","th":"คู่แข่ง","read":"คอม-เพ-ทิ-เทอร์","cat":"การตลาด"},{"en":"Discount","pos":"","th":"ส่วนลด","read":"ดิส-เคานท์","cat":"การตลาด"},{"en":"Launch","pos":"","th":"เปิดตัวสินค้า","read":"ลอนช์","cat":"การตลาด"},{"en":"Feedback","pos":"","th":"ผลตอบรับ","read":"ฟีด-แบ็ก","cat":"การตลาด"},{"en":"Agenda","pos":"","th":"วาระการประชุม","read":"อะ-เจน-ดา","cat":"สำนักงาน"},{"en":"Minutes","pos":"","th":"รายงานการประชุม","read":"มิ-นิทส์","cat":"สำนักงาน"},{"en":"Schedule","pos":"","th":"ตารางเวลา","read":"สเก-จูล","cat":"สำนักงาน"},{"en":"Attach","pos":"","th":"แนบเอกสาร","read":"อะ-แทช","cat":"สำนักงาน"},{"en":"Postpone","pos":"","th":"เลื่อนกำหนด","read":"โพสท์-โพน","cat":"สำนักงาน"},{"en":"Confirm","pos":"","th":"ยืนยัน","read":"คอน-เฟิร์ม","cat":"สำนักงาน"},{"en":"Reminder","pos":"","th":"ข้อความเตือน","read":"รี-ไมนด์-เดอร์","cat":"สำนักงาน"},{"en":"Draft","pos":"","th":"ฉบับร่าง","read":"ดราฟท์","cat":"สำนักงาน"},{"en":"Shipment","pos":"","th":"การจัดส่งสินค้า","read":"ชิพ-เมนท์","cat":"โลจิสติกส์"},{"en":"Warehouse","pos":"","th":"คลังสินค้า","read":"แวร์-เฮาส์","cat":"โลจิสติกส์"},{"en":"Inventory","pos":"","th":"สินค้าคงคลัง","read":"อิน-เวน-ทอ-รี่","cat":"โลจิสติกส์"},{"en":"Delay","pos":"","th":"ความล่าช้า","read":"ดี-เลย์","cat":"โลจิสติกส์"},{"en":"Supplier","pos":"","th":"ผู้จัดหาสินค้า","read":"ซัพ-พลาย-เออร์","cat":"โลจิสติกส์"},{"en":"Freight","pos":"","th":"ค่าขนส่งสินค้า","read":"เฟรท","cat":"โลจิสติกส์"},{"en":"Purchase","pos":"","th":"การสั่งซื้อ","read":"เพอร์-เชิส","cat":"โลจิสติกส์"},{"en":"Delivery","pos":"","th":"การส่งมอบ","read":"ดี-ลิ-เวอ-รี่","cat":"โลจิสติกส์"},{"en":"Itinerary","pos":"","th":"กำหนดการเดินทาง","read":"ไอ-ทิ-เนอ-รา-รี่","cat":"เดินทางธุรกิจ"},{"en":"Reservation","pos":"","th":"การจองล่วงหน้า","read":"เร-เซอร์-เว-ชัน","cat":"เดินทางธุรกิจ"},{"en":"Accommodation","pos":"","th":"ที่พัก","read":"อะ-คอม-โม-เด-ชัน","cat":"เดินทางธุรกิจ"},{"en":"Boarding","pos":"","th":"การขึ้นเครื่อง","read":"บอร์ด-ดิ้ง","cat":"เดินทางธุรกิจ"},{"en":"Reimburse","pos":"","th":"เบิกเงินคืน","read":"รี-อิม-เบิร์ส","cat":"เดินทางธุรกิจ"},{"en":"Conference","pos":"","th":"การประชุมใหญ่","read":"คอน-เฟอ-เรนซ์","cat":"เดินทางธุรกิจ"},{"en":"Venue","pos":"","th":"สถานที่จัดงาน","read":"เว-นิว","cat":"เดินทางธุรกิจ"},{"en":"Registration","pos":"","th":"การลงทะเบียน","read":"เร-จิส-เทร-ชัน","cat":"เดินทางธุรกิจ"},{"en":"Assembly","pos":"","th":"การประกอบชิ้นส่วน","read":"อะ-เซม-บลี่","cat":"การผลิต"},{"en":"Maintenance","pos":"","th":"การบำรุงรักษา","read":"เมน-เท-เนินซ์","cat":"การผลิต"},{"en":"Facility","pos":"","th":"โรงงาน/สถานที่","read":"ฟะ-ซิ-ลิ-ตี้","cat":"การผลิต"},{"en":"Equipment","pos":"","th":"อุปกรณ์","read":"อิ-ควิพ-เมนท์","cat":"การผลิต"},{"en":"Defect","pos":"","th":"ข้อบกพร่อง","read":"ดี-เฟกต์","cat":"การผลิต"},{"en":"Efficiency","pos":"","th":"ประสิทธิภาพ","read":"อิ-ฟิ-เชิน-ซี่","cat":"การผลิต"},{"en":"Quality","pos":"","th":"คุณภาพ","read":"ควอ-ลิ-ตี้","cat":"การผลิต"},{"en":"Safety","pos":"","th":"ความปลอดภัย","read":"เซฟ-ที่","cat":"การผลิต"}]},"advanced":{"id":"advanced","label":"ขั้นสูง","tier":"C1","blurb":"Academic Word List สำหรับ IELTS / TOEFL","target":1000,"source":"pending","words":[]}};</script>
+<script>
+/* ═══════════════════════════════════════════════════════════
+   สนามคำศัพท์ — ตรรกะเกมทั้งหมด
+   แก้ค่าต่างๆ ได้ที่ config.js ไม่ต้องแตะไฟล์นี้
+   ═══════════════════════════════════════════════════════════ */
+"use strict";
+
+const CFG = window.VA_CONFIG;
+const R = CFG.RULES;
+
+const MODES = {
+  rush: {
+    label: "⏱ ตะลุยเวลา", short: "ตะลุยเวลา",
+    note: "จับเวลาทั้งเกม ตอบให้ได้มากที่สุด · ตอบผิดหักเวลา " + R.rushPenalty + " วินาที · ตอบถูกติดกันได้ตัวคูณคอมโบ — โหมดหลักสำหรับแข่งกัน"
+  },
+  survive: {
+    label: "💀 อึดไม่ตาย", short: "อึดไม่ตาย",
+    note: "ตอบผิดหรือหมดเวลาแม้ข้อเดียว = จบเกมทันที วัดกันที่ใครไปได้ไกลกว่ากัน"
+  },
+  duel: {
+    label: "🎯 ท้าดวล", short: "ท้าดวล",
+    note: "ทั้งสองฝ่ายใส่รหัสดวลเดียวกัน จะได้คำถามชุดเดียวกันเป๊ะ เรียงเหมือนกัน ตัวเลือกเหมือนกัน — ยุติธรรมที่สุด และกระดานจะเทียบเฉพาะคนที่เล่นรหัสนี้"
+  }
+};
+
+/* ── สถานะ ───────────────────────────────────────────── */
+const S = {
+  name: "", level: CFG.LEVELS[0], mode: "rush", cat: "", code: "",
+  score: 0, correct: 0, asked: 0, streak: 0, bestStreak: 0,
+  queue: [], q: null, missed: [], qStart: 0,
+  timeLeft: 0, tick: null, nextT: null, locked: false, playing: false
+};
+
+const OPT = {
+  size: "m", theme: "auto", sound: true, reverse: false, speak: false,
+  rushSecs: R.rushSeconds, perSecs: R.surviveSeconds
+};
+
+const DB = {};            // ข้อมูลคำศัพท์ที่โหลดแล้ว
+let ONLINE = false;       // ต่อ Supabase ได้หรือไม่
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const num = n => n.toLocaleString("en-US");
+
+/* ── เก็บค่าลงเครื่อง ─────────────────────────────────── */
+const LS = {
+  get(k, d) { try { const v = localStorage.getItem("va." + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("va." + k, JSON.stringify(v)); } catch { } }
+};
+
+/* ── สุ่มแบบมีเมล็ด: รหัสดวลเดียวกัน = ชุดคำเดียวกัน ──── */
+function hash(str) {
+  let h = 2166136261;
+  for (let i = 0; i < str.length; i++) { h ^= str.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return h >>> 0;
+}
+function rng(seed) {
+  let a = seed >>> 0;
+  return function () {
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+function shuffle(arr, rand) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(rand() * (i + 1));[a[i], a[j]] = [a[j], a[i]]; }
+  return a;
+}
+const randCode = () => {
+  let c = "";
+  for (let i = 0; i < 4; i++) c += "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)];
+  return c;
+};
+
+/* ═══ กระดานคะแนน ════════════════════════════════════════
+   ออนไลน์ = Supabase (ทุกคนเห็นตรงกัน)
+   ออฟไลน์ = เก็บในเครื่อง เล่นได้ปกติแต่เห็นแค่ของตัวเอง
+   ═══════════════════════════════════════════════════════ */
+const SB = {
+  ready() { return !!(CFG.SUPABASE_URL && CFG.SUPABASE_KEY); },
+  head() {
+    return {
+      "apikey": CFG.SUPABASE_KEY,
+      "Authorization": "Bearer " + CFG.SUPABASE_KEY,
+      "Content-Type": "application/json"
+    };
+  },
+  async get(query) {
+    const res = await fetch(CFG.SUPABASE_URL + "/rest/v1/scores?" + query, { headers: this.head() });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  },
+  async post(row) {
+    const res = await fetch(CFG.SUPABASE_URL + "/rest/v1/scores", {
+      method: "POST",
+      headers: Object.assign(this.head(), { "Prefer": "return=minimal" }),
+      body: JSON.stringify(row)
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status + " " + (await res.text()));
+  }
+};
+
+async function checkNet() {
+  const el = $("net");
+  if (!SB.ready()) { ONLINE = false; el.textContent = "เก็บในเครื่อง"; el.className = "net off"; return; }
+  try {
+    await SB.get("select=id&limit=1");
+    ONLINE = true; el.textContent = "กระดานกลาง"; el.className = "net on";
+  } catch (e) {
+    ONLINE = false; el.textContent = "ต่อไม่ได้"; el.className = "net off";
+    console.warn("Supabase:", e.message);
+  }
+}
+
+/* บันทึกผล — ส่งขึ้นกระดานกลางถ้าต่อได้ และเก็บสำเนาในเครื่องเสมอ */
+async function submit(entry) {
+  const mine = LS.get("scores", []);
+  const i = mine.findIndex(e => e.name === entry.name && e.level === entry.level
+    && e.mode === entry.mode && (e.code || "") === (entry.code || ""));
+  let personalBest = true;
+  if (i >= 0) { if (mine[i].score < entry.score) mine[i] = entry; else personalBest = false; }
+  else mine.push(entry);
+  LS.set("scores", mine);
+
+  if (ONLINE && entry.score > 0) {
+    try {
+      await SB.post({
+        name: entry.name, level: entry.level, mode: entry.mode,
+        score: entry.score, correct: entry.correct, asked: entry.asked,
+        duel_code: entry.code || null
+      });
+    } catch (e) { console.warn("ส่งคะแนนไม่สำเร็จ:", e.message); toast("ส่งคะแนนขึ้นกระดานกลางไม่สำเร็จ เก็บไว้ในเครื่องแทน"); }
+  }
+  return personalBest;
+}
+
+/* ดึงกระดาน — คืนค่าดีที่สุดของแต่ละคน สูงสุด 10 อันดับ */
+async function fetchBoard(level, mode, code) {
+  let rows;
+  if (ONLINE) {
+    try {
+      let q = "select=name,score,correct&level=eq." + level + "&mode=eq." + mode;
+      if (mode === "duel" && code) q += "&duel_code=eq." + encodeURIComponent(code);
+      q += "&order=score.desc&limit=300";
+      rows = await SB.get(q);
+    } catch (e) { rows = null; }
+  }
+  if (!rows) {
+    rows = LS.get("scores", []).filter(e => e.level === level && e.mode === mode
+      && (mode !== "duel" || !code || e.code === code));
+  }
+  const best = {};
+  rows.forEach(r => { if (!best[r.name] || best[r.name].score < r.score) best[r.name] = r; });
+  return Object.values(best).sort((a, b) => b.score - a.score).slice(0, 10);
+}
+
+function boardHTML(list, me) {
+  if (!list.length) return '<p class="empty">ยังไม่มีใครทำคะแนนไว้ — เป็นคนแรกเลย</p>';
+  const medal = ["🥇", "🥈", "🥉"];
+  return list.map((e, i) => `<div class="lbrow ${e.name === me ? "me" : ""}">
+      <span class="rk">${medal[i] || i + 1}</span>
+      <span>${esc(e.name)} <span class="meta">${e.correct} ข้อ</span></span>
+      <span class="pts">${num(e.score)}</span>
+    </div>`).join("");
+}
+
+/* ═══ โหลดคลังคำศัพท์ ═══════════════════════════════════ */
+async function loadData() {
+  // เวอร์ชันไฟล์เดียว (แชร์ลิงก์) ฝังข้อมูลมาแล้ว ไม่ต้องโหลดเพิ่ม
+  if (window.VA_DATA) { Object.assign(DB, window.VA_DATA); return; }
+  await Promise.all(CFG.LEVELS.map(async id => {
+    try {
+      const res = await fetch("data/" + id + ".json", { cache: "no-cache" });
+      DB[id] = await res.json();
+    } catch (e) {
+      DB[id] = { id, label: id, tier: "?", blurb: "โหลดข้อมูลไม่สำเร็จ", target: 1000, words: [] };
+      console.warn("โหลด data/" + id + ".json ไม่ได้:", e.message);
+    }
+  }));
+}
+
+/* ═══ สร้างชุดคำถาม ═════════════════════════════════════ */
+function buildQueue() {
+  const lv = DB[S.level];
+  const all = lv.words;
+  const pool = S.cat ? all.filter(w => w.cat === S.cat) : all;
+  if (pool.length < 4) return false;
+
+  const seed = S.mode === "duel" ? hash(S.level + "|" + S.cat + "|" + S.code)
+    : (Math.random() * 4294967296) >>> 0;
+  const rand = rng(seed);
+  const order = shuffle(pool, rand);
+  const limit = S.mode === "duel" ? Math.min(R.duelQuestions, order.length) : order.length;
+
+  S.queue = order.slice(0, limit).map(item => {
+    // ตัวเลือกลวง: เอาจากหมวดเดียวกันก่อน ถ้าไม่พอค่อยดึงจากหมวดอื่น
+    const sameCat = pool.filter(x => x.cat === item.cat && x.th !== item.th);
+    const others = all.filter(x => x.cat !== item.cat && x.th !== item.th);
+    let decoys = shuffle(sameCat, rand).slice(0, 3);
+    if (decoys.length < 3) decoys = decoys.concat(shuffle(others, rand).slice(0, 3 - decoys.length));
+    const rev = OPT.reverse ? rand() < R.reverseChance : false;
+    const opts = shuffle([item, ...decoys], rand);
+    return { item, rev, opts, answer: opts.indexOf(item) };
+  });
+  return true;
+}
+
+/* ═══ ดำเนินเกม ═════════════════════════════════════════ */
+const SCREENS = ["s-home", "s-play", "s-done", "s-set"];
+function show(id) {
+  SCREENS.forEach(s => $(s).classList.toggle("hide", s !== id));
+  window.scrollTo(0, 0);
+}
+
+function perQuestionSecs() {
+  return S.mode === "survive" ? OPT.perSecs : (S.mode === "duel" ? OPT.perSecs + 2 : OPT.rushSecs);
+}
+
+async function begin() {
+  S.name = ($("name").value.trim() || "ผู้เล่น").slice(0, 14);
+  LS.set("name", S.name);
+
+  S.code = S.mode === "duel" ? ($("duelcode").value.trim().toUpperCase() || randCode()) : "";
+  if (S.mode === "duel") $("duelcode").value = S.code;
+
+  if (!buildQueue()) { toast("หมวดนี้มีคำน้อยเกินไป ต้องมีอย่างน้อย 4 คำ"); return; }
+
+  Object.assign(S, { score: 0, correct: 0, asked: 0, streak: 0, bestStreak: 0, missed: [], locked: false, playing: true });
+  $("whoname").textContent = S.name;
+  $("score").textContent = "0";
+  $("streak").classList.add("hide");
+  show("s-play");
+
+  if (S.mode === "rush") { S.timeLeft = OPT.rushSecs; startClock(); }
+  next();
+}
+
+function startClock() {
+  clearInterval(S.tick);
+  const total = perQuestionSecs();
+  paint(S.timeLeft, total);
+  S.tick = setInterval(() => {
+    S.timeLeft -= 0.1;
+    paint(S.timeLeft, total);
+    if (S.timeLeft <= 0) {
+      clearInterval(S.tick);
+      if (S.mode === "rush") finish("หมดเวลา"); else answer(-1);
+    }
+  }, 100);
+}
+function paint(left, total) {
+  const f = Math.max(0, Math.min(1, left / total));
+  const arc = $("arc");
+  arc.style.strokeDashoffset = (138.2 * (1 - f)).toFixed(1);
+  arc.style.stroke = f < 0.25 ? "var(--brick)" : "var(--gold)";
+  $("clock").textContent = Math.max(0, Math.ceil(left));
+}
+
+function next() {
+  if (!S.playing) return;
+  if (!S.queue.length) { finish("เล่นครบทุกคำแล้ว"); return; }
+  S.locked = false;
+  S.q = S.queue.shift();
+  S.qStart = Date.now();
+  const { item, rev, opts } = S.q;
+
+  $("tag").textContent = item.cat + (item.pos ? " · " + item.pos : "");
+  $("word").textContent = rev ? item.th : item.en;
+  $("word").classList.toggle("th", rev);
+  $("phon").textContent = rev ? "" : "[ " + item.read + " ]";
+  $("say").classList.toggle("hide", rev);
+  $("dir").textContent = rev ? "→ เลือกคำภาษาอังกฤษที่ตรงความหมาย" : "→ เลือกความหมายภาษาไทย";
+
+  $("answers").innerHTML = opts.map((o, i) =>
+    `<button class="ans" data-i="${i}"><span class="k">${i + 1}</span><span>${esc(rev ? o.en : o.th)}</span></button>`).join("");
+  $("answers").querySelectorAll("[data-i]").forEach(b => b.onclick = () => answer(+b.dataset.i));
+
+  $("qcount").textContent = S.mode === "duel" ? `ข้อ ${S.asked + 1}/${R.duelQuestions}` : `${S.asked} ข้อ`;
+
+  if (!rev && OPT.speak) speak(item.en);
+  if (S.mode !== "rush") { S.timeLeft = perQuestionSecs(); startClock(); }
+}
+
+function answer(pick) {
+  if (S.locked) return;
+  S.locked = true;
+  if (S.mode !== "rush") clearInterval(S.tick);
+  S.asked++;
+
+  const right = pick === S.q.answer;
+  const btns = $("answers").querySelectorAll(".ans");
+  btns.forEach((b, i) => { b.disabled = true; if (i === S.q.answer) b.classList.add("good"); });
+  if (!right && pick >= 0) btns[pick].classList.add("bad");
+
+  if (right) {
+    S.correct++; S.streak++; S.bestStreak = Math.max(S.bestStreak, S.streak);
+    const secs = (Date.now() - S.qStart) / 1000;
+    const speedBonus = Math.max(0, Math.round((R.speedWindow - secs) * R.speedBonus));
+    const combo = Math.min(R.comboMax, 1 + (S.streak - 1) * R.comboStep);
+    const gain = Math.round((R.basePoints + speedBonus) * combo);
+    S.score += gain;
+    $("score").textContent = num(S.score);
+    $("streak").textContent = "🔥 " + S.streak + (combo > 1 ? ` ×${combo.toFixed(1)}` : "");
+    $("streak").classList.toggle("hide", S.streak < 2);
+    flash("+" + gain, "var(--jade)");
+    beep(660, .09); setTimeout(() => beep(880, .09), 90);
+  } else {
+    S.streak = 0;
+    $("streak").classList.add("hide");
+    S.missed.push(S.q.item);
+    beep(180, .22);
+    if (S.mode === "rush") {
+      S.timeLeft = Math.max(0.1, S.timeLeft - R.rushPenalty);
+      flash("−" + R.rushPenalty + " วิ", "var(--brick)");
+    }
+  }
+
+  if (S.mode === "survive" && !right) { S.nextT = setTimeout(() => finish(pick < 0 ? "หมดเวลา" : "ตอบผิด"), 1100); return; }
+  if (S.mode === "duel" && S.asked >= R.duelQuestions) { S.nextT = setTimeout(() => finish("ครบ " + R.duelQuestions + " ข้อ"), 1100); return; }
+  S.nextT = setTimeout(next, right ? 520 : 1050);
+}
+
+async function finish(reason) {
+  clearInterval(S.tick);
+  clearTimeout(S.nextT);
+  if (!S.playing) return;
+  S.playing = false;
+
+  const lv = DB[S.level];
+  const entry = {
+    name: S.name, level: S.level, mode: S.mode, code: S.code,
+    score: S.score, correct: S.correct, asked: S.asked, at: Date.now()
+  };
+
+  $("r-reason").textContent = reason + " · " + lv.label + " · " + MODES[S.mode].short;
+  $("r-score").textContent = num(S.score);
+  $("r-correct").textContent = S.correct;
+  $("r-acc").textContent = S.asked ? Math.round(S.correct / S.asked * 100) + "%" : "0%";
+  $("r-streak").textContent = S.bestStreak;
+
+  $("r-duel").classList.toggle("hide", S.mode !== "duel");
+  $("r-code").textContent = S.code;
+
+  $("r-miss").classList.toggle("hide", !S.missed.length);
+  $("r-misslist").innerHTML = S.missed.slice(0, 12).map(w =>
+    `<div class="lbrow"><span class="rk">✕</span><span><b>${esc(w.en)}</b>
+      <span class="meta">${esc(w.read)}</span></span><span>${esc(w.th)}</span></div>`).join("");
+
+  $("r-lbhead").textContent = "กระดานคะแนน · " + lv.label + " · " + MODES[S.mode].short
+    + (S.mode === "duel" ? " · รหัส " + S.code : "");
+  $("r-lblist").innerHTML = '<p class="empty">กำลังโหลด…</p>';
+  show("s-done");
+
+  const personalBest = await submit(entry);
+  $("r-line").textContent = S.score === 0 ? "ลองใหม่อีกครั้ง"
+    : (personalBest ? "🎉 สถิติใหม่ของ " + S.name + "!" : "ยังไม่ชนะสถิติเดิมของตัวเอง สู้ต่อ!");
+  $("r-lblist").innerHTML = boardHTML(await fetchBoard(S.level, S.mode, S.code), S.name);
+}
+
+/* ═══ เอฟเฟกต์ ══════════════════════════════════════════ */
+function flash(text, color) {
+  const el = document.createElement("div");
+  el.className = "pop"; el.textContent = text; el.style.color = color;
+  document.body.appendChild(el); setTimeout(() => el.remove(), 760);
+}
+let ac = null;
+function beep(freq, dur) {
+  if (!OPT.sound) return;
+  try {
+    ac = ac || new (window.AudioContext || window.webkitAudioContext)();
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.type = "triangle"; o.frequency.value = freq;
+    g.gain.setValueAtTime(.06, ac.currentTime);
+    g.gain.exponentialRampToValueAtTime(.0001, ac.currentTime + dur);
+    o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + dur);
+  } catch { }
+}
+function speak(word) {
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(word);
+    u.lang = "en-US"; u.rate = .85;
+    speechSynthesis.speak(u);
+  } catch { }
+}
+function toast(msg) {
+  const el = document.createElement("div");
+  el.className = "toast"; el.textContent = msg;
+  document.body.appendChild(el); setTimeout(() => el.remove(), 2500);
+}
+
+/* ═══ หน้าจอหลัก ════════════════════════════════════════ */
+function renderLevels() {
+  $("levels").innerHTML = CFG.LEVELS.map(id => {
+    const lv = DB[id], empty = !lv.words.length;
+    return `<button class="lv" data-lv="${id}" aria-pressed="${S.level === id}" ${empty ? "disabled" : ""}>
+      <span class="tier">${esc(lv.tier)}</span>
+      <span><b>${esc(lv.label)}</b><small>${esc(lv.blurb)}</small></span>
+      <span class="count">${empty ? "เร็วๆ นี้" : lv.words.length + " / " + lv.target}</span>
+    </button>`;
+  }).join("");
+  $("levels").querySelectorAll("[data-lv]").forEach(b => b.onclick = () => {
+    S.level = b.dataset.lv; S.cat = "";
+    LS.set("level", S.level);
+    renderLevels(); renderCats(); refreshBoard();
+  });
+}
+
+function renderCats() {
+  const cats = [...new Set(DB[S.level].words.map(w => w.cat))];
+  $("cat").innerHTML = '<option value="">ทุกหมวด (' + DB[S.level].words.length + ' คำ)</option>'
+    + cats.map(c => {
+      const n = DB[S.level].words.filter(w => w.cat === c).length;
+      return `<option value="${esc(c)}">${esc(c)} (${n})</option>`;
+    }).join("");
+  $("cat").value = S.cat;
+}
+
+function renderModes() {
+  $("modes").innerHTML = Object.entries(MODES).map(([k, m]) =>
+    `<button class="chip" data-m="${k}" aria-pressed="${S.mode === k}">${esc(m.label)}</button>`).join("");
+  $("modes").querySelectorAll("[data-m]").forEach(b => b.onclick = () => {
+    S.mode = b.dataset.m; LS.set("mode", S.mode); renderModes(); refreshBoard();
+  });
+  $("modenote").textContent = MODES[S.mode].note;
+  $("duelbox").classList.toggle("hide", S.mode !== "duel");
+  if (S.mode === "duel" && !$("duelcode").value) $("duelcode").value = randCode();
+}
+
+async function refreshBoard() {
+  $("lbtabs").innerHTML = Object.entries(MODES).map(([k, m]) =>
+    `<button class="tab" data-t="${k}" aria-pressed="${S.mode === k}">${esc(m.short)}</button>`).join("");
+  $("lbtabs").querySelectorAll("[data-t]").forEach(b => b.onclick = () => {
+    S.mode = b.dataset.t; renderModes(); refreshBoard();
+  });
+  const code = S.mode === "duel" ? $("duelcode").value.trim().toUpperCase() : "";
+  $("lbwho").textContent = DB[S.level].label + (code ? " · รหัส " + code : "");
+  $("lblist").innerHTML = '<p class="empty">กำลังโหลด…</p>';
+  $("lblist").innerHTML = boardHTML(await fetchBoard(S.level, S.mode, code), S.name);
+}
+
+/* ═══ ตั้งค่า ═══════════════════════════════════════════ */
+function applyOpts() {
+  document.documentElement.setAttribute("data-size", OPT.size);
+  if (OPT.theme === "auto") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", OPT.theme);
+  seg("seg-size", OPT.size); seg("seg-theme", OPT.theme);
+  seg("seg-rush", String(OPT.rushSecs)); seg("seg-per", String(OPT.perSecs));
+  $("sw-sound").setAttribute("aria-pressed", OPT.sound);
+  $("sw-rev").setAttribute("aria-pressed", OPT.reverse);
+  $("sw-speak").setAttribute("aria-pressed", OPT.speak);
+  LS.set("opts", OPT);
+}
+function seg(id, val) {
+  $(id).querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === val));
+}
+function wireSeg(id, key, cast) {
+  $(id).querySelectorAll("button").forEach(b => b.onclick = () => {
+    OPT[key] = cast ? cast(b.dataset.v) : b.dataset.v; applyOpts();
+  });
+}
+function wireSwitch(id, key) {
+  $(id).onclick = () => { OPT[key] = !OPT[key]; applyOpts(); };
+}
+
+/* ═══ ต่อสาย ════════════════════════════════════════════ */
+$("start").onclick = begin;
+$("again").onclick = begin;
+$("home").onclick = () => { refreshBoard(); show("s-home"); };
+$("quit").onclick = () => finish("จบเกมเอง");
+$("newcode").onclick = () => { $("duelcode").value = randCode(); refreshBoard(); };
+$("duelcode").oninput = () => refreshBoard();
+$("cat").onchange = e => { S.cat = e.target.value; };
+$("gear").onclick = () => show("s-set");
+$("set-back").onclick = () => show("s-home");
+$("say").onclick = () => { if (S.q && !S.q.rev) speak(S.q.item.en); };
+$("share").onclick = () => {
+  const lv = DB[S.level].label;
+  const text = `ท้าดวลคำศัพท์! ระดับ${lv} รหัส ${S.code}\nฉันได้ ${num(S.score)} คะแนน ลองสู้ดู\n${location.href}`;
+  if (navigator.share) navigator.share({ text }).catch(() => { });
+  else navigator.clipboard.writeText(text).then(() => toast("คัดลอกแล้ว ส่งให้เพื่อนได้เลย"), () => toast("คัดลอกไม่สำเร็จ"));
+};
+
+wireSeg("seg-size", "size");
+wireSeg("seg-theme", "theme");
+wireSeg("seg-rush", "rushSecs", Number);
+wireSeg("seg-per", "perSecs", Number);
+wireSwitch("sw-sound", "sound");
+wireSwitch("sw-rev", "reverse");
+wireSwitch("sw-speak", "speak");
+
+document.addEventListener("keydown", e => {
+  if ($("s-play").classList.contains("hide")) return;
+  if (e.key >= "1" && e.key <= "4") {
+    const b = $("answers").querySelector(`[data-i="${+e.key - 1}"]`);
+    if (b && !b.disabled) b.click();
+  }
+});
+
+/* ═══ เริ่มต้น ══════════════════════════════════════════ */
+(async function boot() {
+  Object.assign(OPT, LS.get("opts", {}));
+  applyOpts();
+
+  $("name").value = LS.get("name", "");
+  S.name = $("name").value;
+  S.level = CFG.LEVELS.includes(LS.get("level", "")) ? LS.get("level") : CFG.LEVELS[0];
+  S.mode = MODES[LS.get("mode", "")] ? LS.get("mode") : "rush";
+
+  await loadData();
+  if (!DB[S.level].words.length) S.level = CFG.LEVELS.find(id => DB[id].words.length) || CFG.LEVELS[0];
+
+  renderLevels(); renderCats(); renderModes();
+
+  const total = CFG.LEVELS.reduce((n, id) => n + DB[id].words.length, 0);
+  $("foot").innerHTML = "คลังคำปัจจุบัน " + num(total) + " คำ · เป้าหมาย 4,000 คำ<br>"
+    + (SB.ready() ? "คะแนนขึ้นกระดานกลาง ทุกคนเห็นตรงกัน" : "ยังไม่ได้ตั้งค่ากระดานกลาง — ดู SETUP.md");
+
+  await checkNet();
+  refreshBoard();
+})();
+
+</script>
+</body>
+</html>

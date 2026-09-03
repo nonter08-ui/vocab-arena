@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>สนามคำศัพท์</title>
+<meta name="description" content="เกมฝึกคำศัพท์ภาษาอังกฤษ 4 ระดับ พร้อมกระดานคะแนนแข่งกับเพื่อน">
+<meta name="theme-color" content="#14110D">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏆</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+
+<header class="mast">
+  <h1>สนามคำศัพท์</h1>
+  <div class="right">
+    <span class="net" id="net">กำลังเชื่อมต่อ</span>
+    <button class="icon" id="gear" title="ตั้งค่า" aria-label="ตั้งค่า">⚙</button>
+  </div>
+</header>
+
+<!-- ══ ตั้งค่า ══════════════════════════════════════════ -->
+<section id="s-set" class="hide">
+  <div class="panel">
+    <div class="eyebrow">ตั้งค่า</div>
+    <div class="row">
+      <span>ขนาดตัวอักษร</span>
+      <div class="seg" id="seg-size">
+        <button data-v="s" aria-pressed="false">เล็ก</button>
+        <button data-v="m" aria-pressed="true">กลาง</button>
+        <button data-v="l" aria-pressed="false">ใหญ่</button>
+      </div>
+    </div>
+    <div class="row">
+      <span>ธีมสี</span>
+      <div class="seg" id="seg-theme">
+        <button data-v="auto" aria-pressed="true">อัตโนมัติ</button>
+        <button data-v="light" aria-pressed="false">สว่าง</button>
+        <button data-v="dark" aria-pressed="false">มืด</button>
+      </div>
+    </div>
+    <div class="row">
+      <span>เสียงประกอบ</span>
+      <button class="sw" id="sw-sound" aria-pressed="true" aria-label="เปิดปิดเสียง"></button>
+    </div>
+    <div class="row">
+      <span>สลับถาม อังกฤษ ↔ ไทย<br><small style="color:var(--tx3)">ยากขึ้น ฝึกนึกคำเอง</small></span>
+      <button class="sw" id="sw-rev" aria-pressed="false" aria-label="สลับทิศทางคำถาม"></button>
+    </div>
+    <div class="row">
+      <span>อ่านออกเสียงอัตโนมัติ</span>
+      <button class="sw" id="sw-speak" aria-pressed="false" aria-label="อ่านออกเสียงอัตโนมัติ"></button>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow">เวลาและคะแนน</div>
+    <div class="row">
+      <span>ตะลุยเวลา — เวลาทั้งเกม</span>
+      <div class="seg" id="seg-rush">
+        <button data-v="30" aria-pressed="false">30 วิ</button>
+        <button data-v="60" aria-pressed="true">60 วิ</button>
+        <button data-v="120" aria-pressed="false">2 นาที</button>
+      </div>
+    </div>
+    <div class="row">
+      <span>เวลาต่อข้อ (อึดไม่ตาย / ท้าดวล)</span>
+      <div class="seg" id="seg-per">
+        <button data-v="6" aria-pressed="false">6 วิ</button>
+        <button data-v="8" aria-pressed="true">8 วิ</button>
+        <button data-v="12" aria-pressed="false">12 วิ</button>
+      </div>
+    </div>
+    <p class="note" style="min-height:0">คะแนนต่อข้อ = (100 + โบนัสความเร็ว) × ตัวคูณคอมโบ<br>
+      ตอบภายใน 5 วินาทีได้โบนัสความเร็วสูงสุด 100 · ตอบถูกติดกัน 10 ข้อได้ตัวคูณสูงสุด ×2.0</p>
+  </div>
+
+  <button class="ghost" id="set-back">เสร็จแล้ว</button>
+</section>
+
+<!-- ══ หน้าแรก ═════════════════════════════════════════ -->
+<section id="s-home">
+  <div class="panel">
+    <div class="eyebrow">ผู้เล่น</div>
+    <div class="field"><span>👤</span><input id="name" maxlength="14" placeholder="ใส่ชื่อของคุณ" autocomplete="off"></div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow">เลือกระดับ</div>
+    <div class="levels" id="levels"></div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow">โหมดการเล่น</div>
+    <div class="chips" id="modes"></div>
+    <p class="note" id="modenote"></p>
+    <div class="duel hide" id="duelbox">
+      <input id="duelcode" maxlength="5" placeholder="รหัสดวล" autocomplete="off">
+      <button id="newcode">สุ่มใหม่</button>
+    </div>
+    <div class="row">
+      <span>เจาะเฉพาะหมวด</span>
+      <select id="cat"><option value="">ทุกหมวด</option></select>
+    </div>
+  </div>
+
+  <button class="go" id="start">เริ่มเล่น</button>
+
+  <div class="panel">
+    <div class="eyebrow"><span>กระดานคะแนน</span><em id="lbwho"></em></div>
+    <div class="tabs" id="lbtabs"></div>
+    <div id="lblist"></div>
+  </div>
+
+  <p class="foot" id="foot"></p>
+</section>
+
+<!-- ══ เล่นเกม ═════════════════════════════════════════ -->
+<section id="s-play" class="hide">
+  <div class="panel">
+    <div class="hud">
+      <div class="dial">
+        <svg width="52" height="52" viewBox="0 0 52 52" aria-hidden="true">
+          <circle cx="26" cy="26" r="22" fill="none" stroke="var(--line)" stroke-width="4"></circle>
+          <circle id="arc" cx="26" cy="26" r="22" fill="none" stroke="var(--gold)" stroke-width="4"
+                  stroke-linecap="round" stroke-dasharray="138.2" stroke-dashoffset="0"></circle>
+        </svg>
+        <div class="val mono" id="clock">60</div>
+      </div>
+      <div>
+        <div class="who"><span id="whoname">—</span><span class="streak hide" id="streak"></span></div>
+        <div class="score mono" id="score">0</div>
+      </div>
+      <div class="qcount" id="qcount"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:14px">
+    <span class="tag" id="tag">—</span>
+    <div class="word" id="word">—</div>
+    <div class="phon mono" id="phon"></div>
+    <button class="say" id="say" title="ฟังเสียงอ่าน" aria-label="ฟังเสียงอ่าน">🔊</button>
+    <div class="dir" id="dir"></div>
+  </div>
+
+  <div class="answers" id="answers"></div>
+  <button class="ghost" id="quit">จบเกม &amp; บันทึกคะแนน</button>
+</section>
+
+<!-- ══ ผลลัพธ์ ═════════════════════════════════════════ -->
+<section id="s-done" class="hide">
+  <div class="card">
+    <div class="eyebrow" style="justify-content:center" id="r-reason">จบเกม</div>
+    <div class="big mono" id="r-score">0</div>
+    <div style="font-size:13px; color:var(--tx2); margin-top:6px" id="r-line">—</div>
+    <div class="stats">
+      <div><b class="mono" id="r-correct">0</b><span>ตอบถูก</span></div>
+      <div><b class="mono" id="r-acc">0%</b><span>ความแม่นยำ</span></div>
+      <div><b class="mono" id="r-streak">0</b><span>คอมโบสูงสุด</span></div>
+    </div>
+  </div>
+
+  <div class="panel hide" id="r-duel" style="text-align:center">
+    <div class="eyebrow" style="justify-content:center">ส่งรหัสนี้ให้เพื่อนเล่นชุดคำเดียวกัน</div>
+    <div class="code" id="r-code">—</div>
+    <button class="ghost" id="share">คัดลอกคำท้าดวล</button>
+  </div>
+
+  <div class="panel hide" id="r-miss">
+    <div class="eyebrow">คำที่ตอบผิด</div>
+    <div id="r-misslist"></div>
+  </div>
+
+  <div class="panel">
+    <div class="eyebrow" id="r-lbhead">กระดานคะแนน</div>
+    <div id="r-lblist"></div>
+  </div>
+
+  <button class="go" id="again">เล่นอีกครั้ง</button>
+  <button class="ghost" id="home">กลับหน้าแรก</button>
+</section>
+
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
