@@ -1,0 +1,3 @@
+# ไฟล์ทำงานชั่วคราว ไม่ต้องขึ้น GitHub
+tools/csv/
+tools/batch*.json

@@ -15,7 +15,7 @@
 
 window.VA_CONFIG = {
 
-  SUPABASE_URL: "https://jisptboixukvtzevcktt.supabase.co/rest/v1/",
+  SUPABASE_URL: "https://jisptboixukvtzevcktt.supabase.co",
   SUPABASE_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imppc3B0Ym9peHVrdnR6ZXZja3R0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgzOTYyOTIsImV4cCI6MjEwMzk3MjI5Mn0.pSnyS-h-OlQQy7g0F1KGLm1b4OYHMN53ExuP97C-kGU",
 
   /* ── กติกาเกม ปรับได้ตามใจ ───────────────────────────── */
