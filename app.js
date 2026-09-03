@@ -79,21 +79,28 @@ const randCode = () => {
    ออฟไลน์ = เก็บในเครื่อง เล่นได้ปกติแต่เห็นแค่ของตัวเอง
    ═══════════════════════════════════════════════════════ */
 const SB = {
-  ready() { return !!(CFG.SUPABASE_URL && CFG.SUPABASE_KEY); },
+  // รับ URL ได้ทุกแบบที่ก๊อบมาจากหน้า Supabase
+  // ทั้ง https://xxx.supabase.co  และ  https://xxx.supabase.co/rest/v1/
+  base() {
+    return String(CFG.SUPABASE_URL || "").trim()
+      .replace(/\/+$/, "")
+      .replace(/\/rest\/v1$/, "");
+  },
+  ready() { return !!(this.base() && String(CFG.SUPABASE_KEY || "").trim()); },
   head() {
     return {
-      "apikey": CFG.SUPABASE_KEY,
-      "Authorization": "Bearer " + CFG.SUPABASE_KEY,
+      "apikey": String(CFG.SUPABASE_KEY).trim(),
+      "Authorization": "Bearer " + String(CFG.SUPABASE_KEY).trim(),
       "Content-Type": "application/json"
     };
   },
   async get(query) {
-    const res = await fetch(CFG.SUPABASE_URL + "/rest/v1/scores?" + query, { headers: this.head() });
+    const res = await fetch(this.base() + "/rest/v1/scores?" + query, { headers: this.head() });
     if (!res.ok) throw new Error("HTTP " + res.status);
     return res.json();
   },
   async post(row) {
-    const res = await fetch(CFG.SUPABASE_URL + "/rest/v1/scores", {
+    const res = await fetch(this.base() + "/rest/v1/scores", {
       method: "POST",
       headers: Object.assign(this.head(), { "Prefer": "return=minimal" }),
       body: JSON.stringify(row)
