@@ -484,7 +484,8 @@ const MODES = {
 const S = {
   name: "", level: CFG.LEVELS[0], mode: "rush", cat: "", code: "",
   score: 0, correct: 0, asked: 0, streak: 0, bestStreak: 0,
-  queue: [], q: null, missed: [], qStart: 0,
+  order: [], byCat: null, pool: [], rand: null, pos: 0, limit: 0,
+  q: null, missed: [], qStart: 0,
   timeLeft: 0, tick: null, nextT: null, locked: false, playing: false
 };
 
@@ -646,30 +647,52 @@ async function loadData() {
   }));
 }
 
-/* ═══ สร้างชุดคำถาม ═════════════════════════════════════ */
+/* ═══ สร้างชุดคำถาม ═════════════════════════════════════
+   สร้างทีละข้อตอนที่ต้องใช้ ไม่สร้างล่วงหน้าทั้งพันข้อ
+   ทำให้เพิ่มคำศัพท์กี่หมื่นคำก็ไม่ช้าลง
+   ═══════════════════════════════════════════════════════ */
 function buildQueue() {
-  const lv = DB[S.level];
-  const all = lv.words;
+  const all = DB[S.level].words;
   const pool = S.cat ? all.filter(w => w.cat === S.cat) : all;
   if (pool.length < 4) return false;
 
   const seed = S.mode === "duel" ? hash(S.level + "|" + S.cat + "|" + S.code)
     : (Math.random() * 4294967296) >>> 0;
-  const rand = rng(seed);
-  const order = shuffle(pool, rand);
-  const limit = S.mode === "duel" ? Math.min(R.duelQuestions, order.length) : order.length;
 
-  S.queue = order.slice(0, limit).map(item => {
-    // ตัวเลือกลวง: เอาจากหมวดเดียวกันก่อน ถ้าไม่พอค่อยดึงจากหมวดอื่น
-    const sameCat = pool.filter(x => x.cat === item.cat && x.th !== item.th);
-    const others = all.filter(x => x.cat !== item.cat && x.th !== item.th);
-    let decoys = shuffle(sameCat, rand).slice(0, 3);
-    if (decoys.length < 3) decoys = decoys.concat(shuffle(others, rand).slice(0, 3 - decoys.length));
-    const rev = OPT.reverse ? rand() < R.reverseChance : false;
-    const opts = shuffle([item, ...decoys], rand);
-    return { item, rev, opts, answer: opts.indexOf(item) };
-  });
+  S.rand = rng(seed);
+  S.order = shuffle(pool, S.rand);
+  S.pool = pool;
+  S.pos = 0;
+  S.limit = S.mode === "duel" ? Math.min(R.duelQuestions, pool.length) : pool.length;
+
+  // จัดกลุ่มตามหมวดครั้งเดียว จะได้ไม่ต้องไล่หาใหม่ทุกข้อ
+  S.byCat = {};
+  for (const w of pool) (S.byCat[w.cat] || (S.byCat[w.cat] = [])).push(w);
   return true;
+}
+
+/* หยิบคำถามถัดไป คืน null เมื่อเล่นครบแล้ว */
+function makeQuestion() {
+  if (S.pos >= S.limit) return null;
+  const item = S.order[S.pos++];
+  const rand = S.rand;
+
+  // ตัวเลือกลวง: สุ่มจากหมวดเดียวกันก่อน ถ้าไม่พอค่อยดึงจากหมวดอื่น
+  const used = new Set([item.th]);
+  const decoys = [];
+  const draw = (list, tries) => {
+    for (let i = 0; decoys.length < 3 && i < tries && list.length; i++) {
+      const c = list[Math.floor(rand() * list.length)];
+      if (!used.has(c.th)) { used.add(c.th); decoys.push(c); }
+    }
+  };
+  draw(S.byCat[item.cat] || [], 40);
+  draw(S.pool, 120);
+  if (decoys.length < 3) return null;   // คำน้อยเกินไปจนหาตัวเลือกไม่ได้
+
+  const rev = OPT.reverse ? rand() < R.reverseChance : false;
+  const opts = shuffle([item, ...decoys], rand);
+  return { item, rev, opts, answer: opts.indexOf(item) };
 }
 
 /* ═══ ดำเนินเกม ═════════════════════════════════════════ */
@@ -725,9 +748,10 @@ function paint(left, total) {
 
 function next() {
   if (!S.playing) return;
-  if (!S.queue.length) { finish("เล่นครบทุกคำแล้ว"); return; }
+  const q = makeQuestion();
+  if (!q) { finish("เล่นครบทุกคำแล้ว"); return; }
   S.locked = false;
-  S.q = S.queue.shift();
+  S.q = q;
   S.qStart = Date.now();
   const { item, rev, opts } = S.q;
 
